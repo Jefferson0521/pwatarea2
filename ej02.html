@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Compacta</title>
+    <style>
+        :root {
+            --primary: #2d3436;
+            --secondary: #636e72;
+            --accent: #0984e3;
+            --text: #f5f6fa;
+            --equal: #00b894;
+            --clear: #d63031;
+            --hover: #00cec9;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #dfe6e9;
+        }
+        
+        .calculator {
+            width: 300px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        
+        .display {
+            padding: 25px 20px;
+            background-color: var(--primary);
+            color: var(--text);
+            text-align: right;
+            font-size: 2.8rem;
+            font-weight: 300;
+            height: 50px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-areas: 
+                "clear divide multiply"
+                "seven eight nine"
+                "four five six"
+                "one two three"
+                "zero zero decimal"
+                "subtract add equals";
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background-color: var(--secondary);
+        }
+        
+        button {
+            border: none;
+            padding: 20px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            background-color: white;
+            transition: all 0.15s ease;
+            outline: none;
+        }
+        
+        button:hover {
+            background-color: #f1f2f6;
+        }
+        
+        button:active {
+            transform: scale(0.97);
+        }
+        
+        .operator {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .operator:hover {
+            background-color: #0779d4;
+        }
+        
+        .equals {
+            background-color: var(--equal);
+            color: white;
+            grid-area: equals;
+        }
+        
+        .equals:hover {
+            background-color: #00a884;
+        }
+        
+        .clear {
+            background-color: var(--clear);
+            color: white;
+            grid-area: clear;
+        }
+        
+        .clear:hover {
+            background-color: #c0392b;
+        }
+        
+        /* Numeros agrupados */
+        .seven { grid-area: seven; }
+        .eight { grid-area: eight; }
+        .nine { grid-area: nine; }
+        .four { grid-area: four; }
+        .five { grid-area: five; }
+        .six { grid-area: six; }
+        .one { grid-area: one; }
+        .two { grid-area: two; }
+        .three { grid-area: three; }
+        .zero { 
+            grid-area: zero; 
+            grid-column: span 2;
+        }
+        .decimal { grid-area: decimal; }
+        .divide { grid-area: divide; }
+        .multiply { grid-area: multiply; }
+        .subtract { grid-area: subtract; }
+        .add { grid-area: add; }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .back-link:hover {
+            background-color: var(--hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="button-grid">
+            <!-- Primera fila -->
+            <button class="clear">C</button>
+            <button class="operator divide">/</button>
+            <button class="operator multiply">×</button>
+            
+            <!-- Bloque de números -->
+            <button class="seven">7</button>
+            <button class="eight">8</button>
+            <button class="nine">9</button>
+            
+            <button class="four">4</button>
+            <button class="five">5</button>
+            <button class="six">6</button>
+            
+            <button class="one">1</button>
+            <button class="two">2</button>
+            <button class="three">3</button>
+            
+            <button class="zero">0</button>
+            <button class="decimal">.</button>
+            
+            <!-- Operadores al final -->
+            <button class="operator subtract">-</button>
+            <button class="operator add">+</button>
+            <button class="equals">=</button>
+        </div>
+    </div>
+    
+    <a href="index.html" class="back-link">← Volver al menú principal</a>
+
+    <script>
+        let currentInput = '0';
+        let previousInput = '';
+        let operation = null;
+        let shouldReset = false;
+        const display = document.getElementById('display');
+
+        function updateDisplay() {
+            display.textContent = currentInput;
+        }
+
+        function appendNumber(number) {
+            if (currentInput === '0' || shouldReset) {
+                currentInput = '';
+                shouldReset = false;
+            }
+            currentInput += number;
+            updateDisplay();
+        }
+
+        function appendDecimal() {
+            if (shouldReset) {
+                currentInput = '0';
+                shouldReset = false;
+            }
+            if (!currentInput.includes('.')) {
+                currentInput += '.';
+                updateDisplay();
+            }
+        }
+
+        function clearAll() {
+            currentInput = '0';
+            previousInput = '';
+            operation = null;
+            updateDisplay();
+        }
+
+        function setOperation(op) {
+            if (operation !== null) calculate();
+            previousInput = currentInput;
+            operation = op;
+            shouldReset = true;
+        }
+
+        function calculate() {
+            if (operation === null || shouldReset) return;
+            
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+            let result;
+            
+            switch (operation) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '×':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        alert("No se puede dividir por cero");
+                        clearAll();
+                        return;
+                    }
+                    result = prev / current;
+                    break;
+                default:
+                    return;
+            }
+            
+            currentInput = result.toString();
+            operation = null;
+            shouldReset = true;
+            updateDisplay();
+        }
+
+        // Asignar eventos a los botones
+        document.querySelector('.seven').addEventListener('click', () => appendNumber('7'));
+        document.querySelector('.eight').addEventListener('click', () => appendNumber('8'));
+        document.querySelector('.nine').addEventListener('click', () => appendNumber('9'));
+        document.querySelector('.four').addEventListener('click', () => appendNumber('4'));
+        document.querySelector('.five').addEventListener('click', () => appendNumber('5'));
+        document.querySelector('.six').addEventListener('click', () => appendNumber('6'));
+        document.querySelector('.one').addEventListener('click', () => appendNumber('1'));
+        document.querySelector('.two').addEventListener('click', () => appendNumber('2'));
+        document.querySelector('.three').addEventListener('click', () => appendNumber('3'));
+        document.querySelector('.zero').addEventListener('click', () => appendNumber('0'));
+        document.querySelector('.decimal').addEventListener('click', appendDecimal);
+        document.querySelector('.clear').addEventListener('click', clearAll);
+        document.querySelector('.divide').addEventListener('click', () => setOperation('/'));
+        document.querySelector('.multiply').addEventListener('click', () => setOperation('×'));
+        document.querySelector('.subtract').addEventListener('click', () => setOperation('-'));
+        document.querySelector('.add').addEventListener('click', () => setOperation('+'));
+        document.querySelector('.equals').addEventListener('click', calculate);
+
+        // Soporte para teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+            else if (e.key === '.') appendDecimal();
+            else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') 
+                setOperation(e.key === '*' ? '×' : e.key);
+            else if (e.key === 'Enter' || e.key === '=') calculate();
+            else if (e.key === 'Escape') clearAll();
+            else if (e.key === 'Backspace') {
+                currentInput = currentInput.slice(0, -1) || '0';
+                updateDisplay();
+            }
+        });
+    </script>
+</body>
+</html>

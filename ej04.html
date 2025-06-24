@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 4 - Reloj Analógico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .clock-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 30px;
+        }
+        .clock-face {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 10px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .hand {
+            position: absolute;
+            left: 50%;
+            bottom: 50%;
+            transform-origin: 50% 100%;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .hour-hand {
+            width: 8px;
+            height: 80px;
+            margin-left: -4px;
+        }
+        .minute-hand {
+            width: 6px;
+            height: 120px;
+            margin-left: -3px;
+            background-color: #555;
+        }
+        .second-hand {
+            width: 2px;
+            height: 130px;
+            margin-left: -1px;
+            background-color: #f00;
+        }
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            margin-left: -7.5px;
+            margin-top: -7.5px;
+            border-radius: 50%;
+            background-color: #333;
+            z-index: 10;
+        }
+        .digital-clock {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 20px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 15px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .back-link:hover {
+            background-color: #555;
+        }
+        .number {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .number span {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+        }
+        /* Posicionamiento de los números */
+        .number-12 { top: 10px; left: 50%; transform: translateX(-50%); }
+        .number-1 { top: 25px; right: 65px; }
+        .number-2 { top: 70px; right: 25px; }
+        .number-3 { top: 50%; right: 10px; transform: translateY(-50%); }
+        .number-4 { bottom: 70px; right: 25px; }
+        .number-5 { bottom: 25px; right: 65px; }
+        .number-6 { bottom: 10px; left: 50%; transform: translateX(-50%); }
+        .number-7 { bottom: 25px; left: 65px; }
+        .number-8 { bottom: 70px; left: 25px; }
+        .number-9 { top: 50%; left: 10px; transform: translateY(-50%); }
+        .number-10 { top: 70px; left: 25px; }
+        .number-11 { top: 25px; left: 65px; }
+    </style>
+</head>
+<body>
+    <h1>Reloj Analógico</h1>
+    
+    <div class="clock-container">
+        <div class="clock-face">
+            <!-- Marcas de los números -->
+            <div class="number">
+                <span class="number-12">12</span>
+                <span class="number-1">1</span>
+                <span class="number-2">2</span>
+                <span class="number-3">3</span>
+                <span class="number-4">4</span>
+                <span class="number-5">5</span>
+                <span class="number-6">6</span>
+                <span class="number-7">7</span>
+                <span class="number-8">8</span>
+                <span class="number-9">9</span>
+                <span class="number-10">10</span>
+                <span class="number-11">11</span>
+            </div>
+            
+            <div class="hand hour-hand" id="hour-hand"></div>
+            <div class="hand minute-hand" id="minute-hand"></div>
+            <div class="hand second-hand" id="second-hand"></div>
+            <div class="center-circle"></div>
+        </div>
+    </div>
+    
+    <div class="digital-clock" id="digital-clock"></div>
+    
+    <a href="index.html" class="back-link">← Volver al menú principal</a>
+    
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours() % 12;
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            
+            // Calcular grados para cada manecilla
+            const hourDegrees = (hours * 30) + (minutes * 0.5);
+            const minuteDegrees = minutes * 6;
+            const secondDegrees = seconds * 6;
+            
+            // Aplicar rotación a las manecillas
+            document.getElementById('hour-hand').style.transform = `rotate(${hourDegrees}deg)`;
+            document.getElementById('minute-hand').style.transform = `rotate(${minuteDegrees}deg)`;
+            document.getElementById('second-hand').style.transform = `rotate(${secondDegrees}deg)`;
+            
+            // Actualizar reloj digital
+            const digitalHours = now.getHours().toString().padStart(2, '0');
+            const digitalMinutes = now.getMinutes().toString().padStart(2, '0');
+            const digitalSeconds = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('digital-clock').textContent = `${digitalHours}:${digitalMinutes}:${digitalSeconds}`;
+        }
+        
+        // Actualizar el reloj cada segundo
+        setInterval(updateClock, 1000);
+        
+        // Iniciar el reloj inmediatamente
+        updateClock();
+    </script>
+</body>
+</html>

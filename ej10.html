@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 10 - Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .quiz-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .quiz-header {
+            margin-bottom: 30px;
+        }
+        .question {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+        .option:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+        .option.selected {
+            background-color: #d1e7ff;
+            border-color: #0d6efd;
+        }
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        #next-btn {
+            background-color: #0d6efd;
+            color: white;
+        }
+        #next-btn:hover {
+            background-color: #0b5ed7;
+        }
+        #next-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        #submit-btn {
+            background-color: #28a745;
+            color: white;
+            display: none;
+        }
+        #submit-btn:hover {
+            background-color: #218838;
+        }
+        .progress {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+        .result-container {
+            text-align: center;
+            display: none;
+        }
+        .score {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .restart-btn {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .restart-btn:hover {
+            background-color: #e0a800;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .back-link:hover {
+            background-color: #5a6268;
+        }
+        @media (max-width: 600px) {
+            .quiz-container {
+                padding: 20px;
+            }
+            .question {
+                font-size: 1.1rem;
+            }
+            .option {
+                padding: 12px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>Juego de Preguntas y Respuestas</h1>
+            <div class="progress" id="progress">Pregunta 1 de 5</div>
+        </div>
+        
+        <div id="quiz">
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            
+            <div class="controls">
+                <button id="next-btn">Siguiente</button>
+                <button id="submit-btn">Ver Resultado</button>
+            </div>
+        </div>
+        
+        <div class="result-container" id="result-container">
+            <h2>Resultado Final</h2>
+            <div class="score" id="score"></div>
+            <button class="restart-btn" id="restart-btn">Reiniciar Quiz</button>
+        </div>
+    </div>
+    
+    <a href="index.html" class="back-link">← Volver al menú principal</a>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const quizData = [
+                {
+                    question: "¿Cuál es la capital de Francia?",
+                    options: ["Madrid", "Londres", "París", "Berlín"],
+                    answer: "París"
+                },
+                {
+                    question: "¿Cuál es el río más largo del mundo?",
+                    options: ["Nilo", "Amazonas", "Yangtsé", "Misisipi"],
+                    answer: "Amazonas"
+                },
+                {
+                    question: "¿En qué año llegó el hombre a la Luna?",
+                    options: ["1965", "1969", "1972", "1958"],
+                    answer: "1969"
+                },
+                {
+                    question: "¿Cuál es el elemento químico con símbolo 'O'?",
+                    options: ["Oro", "Osmio", "Oxígeno", "Oganesón"],
+                    answer: "Oxígeno"
+                },
+                {
+                    question: "¿Quién pintó 'La noche estrellada'?",
+                    options: ["Pablo Picasso", "Vincent van Gogh", "Claude Monet", "Salvador Dalí"],
+                    answer: "Vincent van Gogh"
+                }
+            ];
+            
+            const questionElement = document.getElementById('question');
+            const optionsElement = document.getElementById('options');
+            const progressElement = document.getElementById('progress');
+            const nextButton = document.getElementById('next-btn');
+            const submitButton = document.getElementById('submit-btn');
+            const resultContainer = document.getElementById('result-container');
+            const scoreElement = document.getElementById('score');
+            const restartButton = document.getElementById('restart-btn');
+            
+            let currentQuestionIndex = 0;
+            let score = 0;
+            let selectedOption = null;
+            
+            function loadQuestion() {
+                const currentQuestion = quizData[currentQuestionIndex];
+                questionElement.textContent = currentQuestion.question;
+                
+                optionsElement.innerHTML = '';
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('div');
+                    button.textContent = option;
+                    button.classList.add('option');
+                    button.addEventListener('click', () => selectOption(button, option));
+                    optionsElement.appendChild(button);
+                });
+                
+                progressElement.textContent = `Pregunta ${currentQuestionIndex + 1} de ${quizData.length}`;
+                selectedOption = null;
+                nextButton.disabled = true;
+                
+                if (currentQuestionIndex === quizData.length - 1) {
+                    nextButton.style.display = 'none';
+                    submitButton.style.display = 'block';
+                } else {
+                    nextButton.style.display = 'block';
+                    submitButton.style.display = 'none';
+                }
+            }
+            
+            function selectOption(button, option) {
+                // Desmarcar cualquier opción seleccionada previamente
+                const options = document.querySelectorAll('.option');
+                options.forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Marcar la nueva opción seleccionada
+                button.classList.add('selected');
+                selectedOption = option;
+                nextButton.disabled = false;
+            }
+            
+            function showResult() {
+                quiz.style.display = 'none';
+                resultContainer.style.display = 'block';
+                scoreElement.textContent = `Puntuación: ${score} de ${quizData.length}`;
+            }
+            
+            function restartQuiz() {
+                currentQuestionIndex = 0;
+                score = 0;
+                quiz.style.display = 'block';
+                resultContainer.style.display = 'none';
+                loadQuestion();
+            }
+            
+            nextButton.addEventListener('click', () => {
+                // Verificar respuesta
+                const currentQuestion = quizData[currentQuestionIndex];
+                if (selectedOption === currentQuestion.answer) {
+                    score++;
+                }
+                
+                // Resaltar respuesta correcta e incorrecta
+                const options = document.querySelectorAll('.option');
+                options.forEach(button => {
+                    button.classList.remove('selected', 'correct', 'incorrect');
+                    if (button.textContent === currentQuestion.answer) {
+                        button.classList.add('correct');
+                    } else if (button.textContent === selectedOption && selectedOption !== currentQuestion.answer) {
+                        button.classList.add('incorrect');
+                    }
+                });
+                
+                // Deshabilitar opciones después de seleccionar
+                options.forEach(button => {
+                    button.style.pointerEvents = 'none';
+                });
+                
+                // Configurar botón para avanzar
+                nextButton.textContent = 'Continuar';
+                nextButton.removeEventListener('click', arguments.callee);
+                nextButton.addEventListener('click', () => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < quizData.length) {
+                        loadQuestion();
+                        nextButton.textContent = 'Siguiente';
+                        nextButton.addEventListener('click', arguments.callee);
+                    }
+                });
+            });
+            
+            submitButton.addEventListener('click', () => {
+                // Verificar última respuesta
+                const currentQuestion = quizData[currentQuestionIndex];
+                if (selectedOption === currentQuestion.answer) {
+                    score++;
+                }
+                showResult();
+            });
+            
+            restartButton.addEventListener('click', restartQuiz);
+            
+            // Iniciar el quiz
+            loadQuestion();
+        });
+    </script>
+</body>
+</html>

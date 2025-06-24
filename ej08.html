@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 8 - Carrusel de Imágenes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .carousel-container {
+            position: relative;
+            width: 800px;
+            max-width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        .carousel img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+        }
+        .carousel-control {
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: background-color 0.3s;
+        }
+        .carousel-control:hover {
+            background-color: rgba(0,0,0,0.8);
+        }
+        .carousel-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .indicator.active {
+            background-color: white;
+        }
+        .caption {
+            position: absolute;
+            bottom: 50px;
+            left: 0;
+            right: 0;
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 15px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .back-link:hover {
+            background-color: #555;
+        }
+        @media (max-width: 768px) {
+            .carousel-container {
+                width: 95%;
+            }
+            .caption {
+                font-size: 14px;
+                bottom: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Carrusel de Imágenes</h1>
+    
+    <div class="carousel-container">
+        <div class="carousel" id="carousel">
+            <img src="https://via.placeholder.com/800x400?text=Imagen+1" alt="Imagen 1">
+            <img src="https://via.placeholder.com/800x400/4CAF50/FFFFFF?text=Imagen+2" alt="Imagen 2">
+            <img src="https://via.placeholder.com/800x400/2196F3/FFFFFF?text=Imagen+3" alt="Imagen 3">
+            <img src="https://via.placeholder.com/800x400/FF5722/FFFFFF?text=Imagen+4" alt="Imagen 4">
+        </div>
+        
+        <div class="carousel-controls">
+            <button class="carousel-control" id="prev-btn">❮</button>
+            <button class="carousel-control" id="next-btn">❯</button>
+        </div>
+        
+        <div class="carousel-indicators" id="indicators">
+            <!-- Los indicadores se generarán con JavaScript -->
+        </div>
+        
+        <div class="caption" id="caption">Imagen 1 de 4</div>
+    </div>
+    
+    <a href="index.html" class="back-link">← Volver al menú principal</a>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = document.getElementById('carousel');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const indicatorsContainer = document.getElementById('indicators');
+            const caption = document.getElementById('caption');
+            const images = document.querySelectorAll('.carousel img');
+            
+            let currentIndex = 0;
+            let intervalId;
+            const captions = [
+                "Hermoso paisaje montañoso",
+                "Verdes campos bajo el cielo azul",
+                "Océano azul con olas cristalinas",
+                "Atardecer en el desierto"
+            ];
+            
+            // Crear indicadores
+            images.forEach((_, index) => {
+                const indicator = document.createElement('div');
+                indicator.classList.add('indicator');
+                if (index === 0) indicator.classList.add('active');
+                indicator.addEventListener('click', () => goToSlide(index));
+                indicatorsContainer.appendChild(indicator);
+            });
+            
+            // Actualizar carrusel
+            function updateCarousel() {
+                carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                // Actualizar indicadores
+                document.querySelectorAll('.indicator').forEach((indicator, index) => {
+                    indicator.classList.toggle('active', index === currentIndex);
+                });
+                
+                // Actualizar caption
+                caption.textContent = `${captions[currentIndex]} (${currentIndex + 1} de ${images.length})`;
+            }
+            
+            // Ir a slide específico
+            function goToSlide(index) {
+                currentIndex = index;
+                updateCarousel();
+                resetInterval();
+            }
+            
+            // Slide anterior
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                updateCarousel();
+                resetInterval();
+            }
+            
+            // Siguiente slide
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % images.length;
+                updateCarousel();
+                resetInterval();
+            }
+            
+            // Reiniciar intervalo automático
+            function resetInterval() {
+                clearInterval(intervalId);
+                startAutoSlide();
+            }
+            
+            // Iniciar desplazamiento automático
+            function startAutoSlide() {
+                intervalId = setInterval(nextSlide, 3000);
+            }
+            
+            // Event listeners
+            prevBtn.addEventListener('click', prevSlide);
+            nextBtn.addEventListener('click', nextSlide);
+            
+            // Iniciar
+            updateCarousel();
+            startAutoSlide();
+            
+            // Pausar al pasar el ratón
+            carousel.addEventListener('mouseenter', () => clearInterval(intervalId));
+            carousel.addEventListener('mouseleave', startAutoSlide);
+        });
+    </script>
+</body>
+</html>
